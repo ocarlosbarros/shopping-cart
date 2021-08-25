@@ -14,13 +14,12 @@ function createCustomElement(element, className, innerText) {
 
 let productsLocalList = [];
 
-function createProductItemElement({ sku, name, image }) {
+function createProductItemElement({ id, title, thumbnail }) {
   const section = document.createElement('section');
   section.className = 'item';
-
-  section.appendChild(createCustomElement('span', 'item__sku', sku));
-  section.appendChild(createCustomElement('span', 'item__title', name));
-  section.appendChild(createProductImageElement(image));
+  section.appendChild(createCustomElement('span', 'item__sku', id));
+  section.appendChild(createCustomElement('span', 'item__title', title));
+  section.appendChild(createProductImageElement(thumbnail));
   section.appendChild(createCustomElement('button', 'item__add', 'Adicionar ao carrinho!'));
 
   return section;
@@ -55,6 +54,7 @@ const getProducts = async (product) => {
   const productListAPI = await fetch(BASE_URL);
   const productsListJson = await productListAPI.json();
   productsLocalList = productsListJson.results;
+  console.log(productsLocalList);
 };
 
 window.onload = async () => {
