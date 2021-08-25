@@ -40,4 +40,10 @@ function createCartItemElement({ sku, name, salePrice }) {
   return li;
 }
 
-window.onload = () => { };
+const getProductList = () => {
+  console.log('loading...');
+};
+
+window.onload = () => {
+  getProductList();
+};
