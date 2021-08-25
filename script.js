@@ -40,11 +40,13 @@ function createCartItemElement({ sku, name, salePrice }) {
   return li;
 }
 
-const getProductList = async (product) => {
+const getProducts = async (product) => {
   const BASE_URL = `https://api.mercadolibre.com/sites/MLB/search?q=${product}`;
   const productList = await fetch(BASE_URL);
+  const productsListJson = await productList.json();
+  console.log(productsListJson);
 };
 
-window.onload = () => {
-  getProductList('computador');
+window.onload = async () => {
+  await getProducts('computador');
 };
