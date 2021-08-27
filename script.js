@@ -1,3 +1,5 @@
+const shoppigCart = [];
+
 function createProductImageElement(imageSource) {
   const img = document.createElement('img');
   img.className = 'item__image';
@@ -42,16 +44,17 @@ function getSkuFromProductItem(item) {
   return item.querySelector('span.item__sku').innerText;
 }
 
-const saveShopping = () => {
-  const shoppingCart = document.querySelectorAll('.cart__items');
-  localStorage.setItem('shopping', shoppingCart);
+const saveShopping = (product) => {
+  shoppigCart.push(product);
+  console.log(shoppigCart);
+  localStorage.setItem('shoppingCart', JSON.stringify(shoppigCart));
 };
 
 const saveItemInCart = (product) => {
   const list = document.querySelector('.cart__items');
   const li = createCartItemElement(product);
   list.appendChild(li);
-  saveShopping();
+  saveShopping(product);
 };
 
 const getItemAPI = async (event) => {
