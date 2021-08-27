@@ -27,7 +27,7 @@ function createProductItemElement({ id, title, thumbnail }) {
 
 function cartItemClickListener(event) {
   const item = event.target;
-  console.log(item);
+  item.remove();
 }
 
 function createCartItemElement({ id: sku, title: name, price: salePrice }) {
