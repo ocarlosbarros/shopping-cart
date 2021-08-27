@@ -43,9 +43,8 @@ function getSkuFromProductItem(item) {
 }
 
 const saveShopping = () => {
-  const shoppingStorage = document.localStorage;
   const shoppingCart = document.querySelectorAll('.cart__items');
-  console.log(shoppingCart.length);
+  localStorage.setItem('shopping', shoppingCart);
 };
 
 const saveItemInCart = (product) => {
