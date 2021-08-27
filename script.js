@@ -1,4 +1,4 @@
-const shoppigCart = [];
+let shoppigCart = [];
 
 function createProductImageElement(imageSource) {
   const img = document.createElement('img');
@@ -13,8 +13,6 @@ function createCustomElement(element, className, innerText) {
   e.innerText = innerText;
   return e;
 }
-
-let productsLocalList = [];
 
 function createProductItemElement({ id, title, thumbnail }) {
   const section = document.createElement('section');
@@ -31,8 +29,7 @@ function getSkuFromProductItem(item) {
   return item.querySelector('span.item__sku').innerText;
 }
 
-const saveShopping = (product) => {
-  shoppigCart.push(product);
+const saveShopping = () => {
   /** Source: https://pt.stackoverflow.com/questions/329223/armazenar-um-array-de-objetos-em-um-local-storage-com-js */
   localStorage.setItem('shoppingCart', JSON.stringify(shoppigCart));
 };
@@ -40,6 +37,9 @@ const saveShopping = (product) => {
 function cartItemClickListener(event) {
   const item = event.target;
   item.remove();
+  const itemID = item.innerText.slice(5, 18);
+  shoppigCart = shoppigCart.filter((product) => product.id !== itemID);
+  saveShopping();
 }
 
 function createCartItemElement({ id: sku, title: name, price: salePrice }) {
@@ -54,16 +54,14 @@ const saveItemInCart = (product) => {
   const list = document.querySelector('.cart__items');
   const li = createCartItemElement(product);
   list.appendChild(li);
-  saveShopping(product);
+  shoppigCart.push(product);
+  saveShopping();
 };
 
 const loadShopping = async () => {
-  const products = JSON.parse(localStorage.getItem('shoppingCart'));
-  if (products !== null) {
-    products.forEach((product) => {
-      saveItemInCart(product);
-    });
-  }
+  JSON.parse(localStorage.getItem('shoppingCart')).forEach((product) => {
+    saveItemInCart(product);
+  });
 };
 
 const getItemAPI = async (event) => {
