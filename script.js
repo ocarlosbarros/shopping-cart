@@ -43,8 +43,8 @@ function getSkuFromProductItem(item) {
 
 const saveItemInCart = (product) => {
   const list = document.querySelector('.cart__items');
-  console.log(product);
-  console.log(list);
+  const li = createCartItemElement(product);
+  list.appendChild(li);
 };
 
 const getItemAPI = async (event) => {
