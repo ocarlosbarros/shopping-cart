@@ -27,6 +27,16 @@ function createProductItemElement({ id, title, thumbnail }) {
   return section;
 }
 
+function getSkuFromProductItem(item) {
+  return item.querySelector('span.item__sku').innerText;
+}
+
+const saveShopping = (product) => {
+  shoppigCart.push(product);
+  /** Source: https://pt.stackoverflow.com/questions/329223/armazenar-um-array-de-objetos-em-um-local-storage-com-js */
+  localStorage.setItem('shoppingCart', JSON.stringify(shoppigCart));
+};
+
 function cartItemClickListener(event) {
   const item = event.target;
   item.remove();
@@ -40,16 +50,6 @@ function createCartItemElement({ id: sku, title: name, price: salePrice }) {
   return li;
 }
 
-function getSkuFromProductItem(item) {
-  return item.querySelector('span.item__sku').innerText;
-}
-
-const saveShopping = (product) => {
-  shoppigCart.push(product);
-  /** Source: https://pt.stackoverflow.com/questions/329223/armazenar-um-array-de-objetos-em-um-local-storage-com-js */
-  localStorage.setItem('shoppingCart', JSON.stringify(shoppigCart));
-};
-
 const saveItemInCart = (product) => {
   const list = document.querySelector('.cart__items');
   const li = createCartItemElement(product);
@@ -59,9 +59,11 @@ const saveItemInCart = (product) => {
 
 const loadShopping = async () => {
   const products = JSON.parse(localStorage.getItem('shoppingCart'));
-  products.forEach((product) => {
-    saveItemInCart(product);
-  });
+  if (products !== null) {
+    products.forEach((product) => {
+      saveItemInCart(product);
+    });
+  }
 };
 
 const getItemAPI = async (event) => {
