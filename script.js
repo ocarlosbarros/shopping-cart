@@ -37,8 +37,16 @@ function createCartItemElement({ id, title, price }) {
   return li;
 }
 
-const getItemAPI = () => {
-  console.log('request');
+const getItemAPI = (event) => {
+  /** source: https://stackoverflow.com/questions/6856871/getting-the-parent-div-of-element */
+  const item = event.target.parentNode;
+  console.log(item);
+  fetch('https://api.mercadolibre.com/items/$')
+    .then((request) => request)
+    .then((response) => {
+      response.json();
+      console.log(response);
+    });
 };
 
 const addCart = () => {
