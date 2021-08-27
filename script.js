@@ -42,10 +42,16 @@ function getSkuFromProductItem(item) {
   return item.querySelector('span.item__sku').innerText;
 }
 
+const saveShopping = () => {
+  const myShopping = localStorage();
+  console.log(myShopping);
+};
+
 const saveItemInCart = (product) => {
   const list = document.querySelector('.cart__items');
   const li = createCartItemElement(product);
   list.appendChild(li);
+  saveShopping();
 };
 
 const getItemAPI = async (event) => {
