@@ -29,10 +29,10 @@ function cartItemClickListener(event) {
 
 }
 
-function createCartItemElement({ id, title, price }) {
+function createCartItemElement({ id: sku, title: name, price: salePrice }) {
   const li = document.createElement('li');
   li.className = 'cart__item';
-  li.innerText = `SKU: ${id} | NAME: ${title} | PRICE: $${price}`;
+  li.innerText = `SKU: ${sku} | NAME: ${name} | PRICE: $${salePrice}`;
   li.addEventListener('click', cartItemClickListener);
   return li;
 }
@@ -41,13 +41,19 @@ function getSkuFromProductItem(item) {
   return item.querySelector('span.item__sku').innerText;
 }
 
+const saveItemInCart = (product) => {
+  const list = document.querySelector('.cart__items');
+  console.log(product);
+  console.log(list);
+};
+
 const getItemAPI = async (event) => {
   /** source: https://stackoverflow.com/questions/6856871/getting-the-parent-div-of-element */
   const item = event.target.parentNode;
   const itemID = getSkuFromProductItem(item);
   const response = await fetch(`https://api.mercadolibre.com/items/${itemID}`);
   const product = await response.json();
-  console.log(product);
+  saveItemInCart(product);
 };
 
 const addCart = () => {
