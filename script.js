@@ -41,16 +41,13 @@ function getSkuFromProductItem(item) {
   return item.querySelector('span.item__sku').innerText;
 }
 
-const getItemAPI = (event) => {
+const getItemAPI = async (event) => {
   /** source: https://stackoverflow.com/questions/6856871/getting-the-parent-div-of-element */
   const item = event.target.parentNode;
   const itemID = getSkuFromProductItem(item);
-  fetch(`https://api.mercadolibre.com/items/${itemID}`)
-    .then((request) => request)
-    .then((response) => {
-      response.json();
-      console.log(response);
-    });
+  const response = await fetch(`https://api.mercadolibre.com/items/${itemID}`);
+  const product = await response.json();
+  console.log(product);
 };
 
 const addCart = () => {
