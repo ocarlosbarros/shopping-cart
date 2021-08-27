@@ -37,11 +37,15 @@ function createCartItemElement({ id, title, price }) {
   return li;
 }
 
+function getSkuFromProductItem(item) {
+  return item.querySelector('span.item__sku').innerText;
+}
+
 const getItemAPI = (event) => {
   /** source: https://stackoverflow.com/questions/6856871/getting-the-parent-div-of-element */
   const item = event.target.parentNode;
-  console.log(item);
-  fetch('https://api.mercadolibre.com/items/$')
+  const itemID = getSkuFromProductItem(item);
+  fetch(`https://api.mercadolibre.com/items/${itemID}`)
     .then((request) => request)
     .then((response) => {
       response.json();
@@ -63,10 +67,6 @@ const fillProductsList = async () => {
     sectionItems.appendChild(section);
   });
 };
-
-function getSkuFromProductItem(item) {
-  return item.querySelector('span.item__sku').innerText;
-}
 
 const getProducts = async (product) => {
   const BASE_URL = `https://api.mercadolibre.com/sites/MLB/search?q=${product}`;
