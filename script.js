@@ -37,9 +37,15 @@ function createCartItemElement({ id, title, price }) {
   return li;
 }
 
+const getItemAPI = () => {
+  console.log('request');
+};
+
 const addCart = () => {
   const btnAddItem = document.querySelectorAll('.item__add');
-  console.log(btnAddItem);
+  btnAddItem.forEach((btnAdd) => {
+    btnAdd.addEventListener('click', getItemAPI);
+  });
 };
 
 const fillProductsList = async () => {
