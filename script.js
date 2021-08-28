@@ -1,7 +1,13 @@
 let productsLocalList = [];
 
 const getCartStorage = () => {
-  const cartStorage = JSON.parse(localStorage.getItem('shoppingCart'));
+  let cartStorage = localStorage.getItem('shoppingCart');
+  if (cartStorage === null) {
+    cartStorage = localStorage.setItem('shoppingCart', '[]');
+    cartStorage = JSON.parse(cartStorage);
+    return cartStorage;
+  }
+  cartStorage = JSON.parse(cartStorage);
   return cartStorage;
 };
 
@@ -34,11 +40,15 @@ function getSkuFromProductItem(item) {
   return item.querySelector('span.item__sku').innerText;
 }
 
-const saveShopping = (product) => {
+const saveShopping = (productOrId) => {
   /** Source: https://pt.stackoverflow.com/questions/329223/armazenar-um-array-de-objetos-em-um-local-storage-com-js */
-  const productJSON = JSON.stringify(product);
-  const shoppigCartStorage = getCartStorage();
-  shoppigCartStorage.push(productJSON);
+  let shoppigCartStorage = getCartStorage();
+  if (typeof productOrId === 'string') {
+    shoppigCartStorage = shoppigCartStorage.filter((product) => product.id !== productOrId);
+  } else {
+    const productJSON = JSON.stringify(productOrId);
+    shoppigCartStorage.push(productJSON);
+  }
   localStorage.setItem('shoppingCart', JSON.stringify(shoppigCartStorage));
 };
 
@@ -63,18 +73,17 @@ const removeItem = () => {
 };
 
 const findItem = (id) => {
-  const shoppigCartStorage = JSON.parse(localStorage.getItem('shoppingCart'));
-  return shoppigCartStorage.find((product) => {
-    JSON.parse(product);
-    return product.id !== id;
-  });
+  const shoppigCartStorage = getCartStorage();
+  return shoppigCartStorage.find((product) => JSON.parse(product).id === id);
 };
 
 function cartItemClickListener(event) {
   const item = event.target;
   item.remove();
   const itemID = item.innerText.slice(5, 18);
-  const productFound = findItem(itemID);
+  const product = findItem(itemID);
+  const { id } = JSON.parse(product);
+  saveShopping(id);
 }
 
 function createCartItemElement({ id: sku, title: name, price: salePrice }) {
@@ -89,15 +98,15 @@ const saveItemInCart = (product) => {
   const list = document.querySelector('.cart__items');
   const li = createCartItemElement(product);
   list.appendChild(li);
-  saveShopping(product);
   getTotalPrice();
 };
 
 const loadShopping = () => {
   const cartStorage = getCartStorage();
-  if (cartStorage === null) {
-    localStorage.setItem('shoppingCart', '[]');
-  }
+  cartStorage.forEach((product) => {
+    const productJSON = JSON.parse(product);
+    saveItemInCart(productJSON);
+  });
   getTotalPrice();
 };
 
@@ -108,6 +117,7 @@ const getItemAPI = async (event) => {
   const response = await fetch(`https://api.mercadolibre.com/items/${itemID}`);
   const product = await response.json();
   saveItemInCart(product);
+  saveShopping(product);
 };
 
 const addCart = () => {
@@ -147,7 +157,7 @@ const getProducts = async (product) => {
 window.onload = async () => {
   await getProducts('computador');
   fillProductsList();
-  loadShopping();
   addCart();
   removeItem();
+  loadShopping();
 };
