@@ -1,4 +1,5 @@
 let shoppigCart = [];
+let productsLocalList = [];
 
 function createProductImageElement(imageSource) {
   const img = document.createElement('img');
@@ -32,6 +33,14 @@ function getSkuFromProductItem(item) {
 const saveShopping = () => {
   /** Source: https://pt.stackoverflow.com/questions/329223/armazenar-um-array-de-objetos-em-um-local-storage-com-js */
   localStorage.setItem('shoppingCart', JSON.stringify(shoppigCart));
+};
+
+const addButton = () => {
+  const btnClearCart = document.querySelector('.empty-cart');
+  btnClearCart.addEventListener('click', () => {
+    localStorage.clear();
+    document.querySelectorAll('.cart__item').forEach((li) => li.remove());
+  });
 };
 
 function cartItemClickListener(event) {
@@ -93,7 +102,6 @@ const getProducts = async (product) => {
   const productListAPI = await fetch(BASE_URL);
   const productsListJson = await productListAPI.json();
   productsLocalList = productsListJson.results;
-  console.log(productsLocalList);
 };
 
 window.onload = async () => {
@@ -101,4 +109,5 @@ window.onload = async () => {
   fillProductsList();
   addCart();
   loadShopping();
+  addButton();
 };
