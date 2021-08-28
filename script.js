@@ -73,6 +73,16 @@ const loadShopping = async () => {
   });
 };
 
+const getTotalPrice = () => {
+  const currentTotal = JSON.parse(localStorage.getItem('shoppingCart'));
+  const cart = document.querySelector('.cart');
+  const p = document.createElement('p');
+  const totalPrice = currentTotal === null ? 0 : 1;
+  p.innerText = `Preço total: ${totalPrice}`;
+  p.classList.add('total-price');
+  cart.appendChild(p);
+};
+
 const getItemAPI = async (event) => {
   /** source: https://stackoverflow.com/questions/6856871/getting-the-parent-div-of-element */
   const item = event.target.parentNode;
@@ -122,4 +132,5 @@ window.onload = async () => {
   addCart();
   loadShopping();
   addButton();
+  getTotalPrice();
 };
