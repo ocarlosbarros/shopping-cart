@@ -1,4 +1,3 @@
-let shoppigCart = [];
 let productsLocalList = [];
 
 function createProductImageElement(imageSource) {
@@ -30,15 +29,24 @@ function getSkuFromProductItem(item) {
   return item.querySelector('span.item__sku').innerText;
 }
 
-const saveShopping = () => {
+const saveShopping = (product) => {
   /** Source: https://pt.stackoverflow.com/questions/329223/armazenar-um-array-de-objetos-em-um-local-storage-com-js */
-  localStorage.setItem('shoppingCart', JSON.stringify(shoppigCart));
+  const productJSON = JSON.stringify(product);
+  const shoppigCartStorage = JSON.parse(localStorage.getItem('shoppingCart'));
+  shoppigCartStorage.push(productJSON);
+  localStorage.setItem('shoppingCart', JSON.stringify(shoppigCartStorage));
+};
+
+const getTotalPrice = () => {
+  const p = document.querySelector('.total-price');
+  /* shoppigCart.reduce((sum, product) =>
+    sum + product.price, 0); */
+  // p.innerText = `Preço total: $${shoppigCart}`;
 };
 
 const addButton = () => {
   const btnClearCart = document.querySelector('.empty-cart');
   btnClearCart.addEventListener('click', () => {
-    localStorage.clear();
     document.querySelectorAll('.cart__item').forEach((li) => li.remove());
   });
 };
@@ -47,8 +55,7 @@ function cartItemClickListener(event) {
   const item = event.target;
   item.remove();
   const itemID = item.innerText.slice(5, 18);
-  shoppigCart = shoppigCart.filter((product) => product.id !== itemID);
-  saveShopping();
+  // const productFound = shoppigCart.find((product) => product.id !== itemID);
 }
 
 function createCartItemElement({ id: sku, title: name, price: salePrice }) {
@@ -63,24 +70,16 @@ const saveItemInCart = (product) => {
   const list = document.querySelector('.cart__items');
   const li = createCartItemElement(product);
   list.appendChild(li);
-  shoppigCart.push(product);
-  saveShopping();
+  saveShopping(product);
 };
 
 const loadShopping = async () => {
-  JSON.parse(localStorage.getItem('shoppingCart')).forEach((product) => {
-    saveItemInCart(product);
-  });
-};
-
-const getTotalPrice = () => {
-  const currentTotal = JSON.parse(localStorage.getItem('shoppingCart'));
-  const cart = document.querySelector('.cart');
-  const p = document.createElement('p');
-  const totalPrice = currentTotal === null ? 0 : currentTotal.reduce((sum, product) => sum + product.base_price, 0);
-  p.innerText = `Preço total: ${totalPrice.toFixed(2)}`;
-  p.classList.add('total-price');
-  cart.appendChild(p);
+  localStorage.setItem('shoppingCart', JSON.stringify([]));
+  // if (shoppigCart.length > 0) {
+  //   shoppigCart.forEach((product) => {
+  //     saveItemInCart(product);
+  //   });
+  // }
 };
 
 const getItemAPI = async (event) => {
@@ -129,8 +128,7 @@ const getProducts = async (product) => {
 window.onload = async () => {
   await getProducts('computador');
   fillProductsList();
-  addCart();
   loadShopping();
+  addCart();
   addButton();
-  getTotalPrice();
 };
