@@ -47,7 +47,7 @@ const getTotalPrice = () => {
     const { price } = JSON.parse(product);
     return sum + price;
   }, 0);
-  p.innerText = `Preço total: $${totalPrice === 0 ? 0 : totalPrice}`;
+  p.innerText = `Preço total: $${totalPrice === 0 ? 0 : totalPrice.toFixed(2)}`;
 };
 
 const saveShopping = (productOrId) => {
