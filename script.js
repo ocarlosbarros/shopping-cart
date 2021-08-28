@@ -97,11 +97,23 @@ const fillProductsList = async () => {
   });
 };
 
+const loadingResponse = () => {
+  const loading = document.getElementById('loading');
+  loading.innerText = 'loading.';
+  return loading;
+};
+
 const getProducts = async (product) => {
   const BASE_URL = `https://api.mercadolibre.com/sites/MLB/search?q=${product}`;
-  const productListAPI = await fetch(BASE_URL);
-  const productsListJson = await productListAPI.json();
-  productsLocalList = productsListJson.results;
+  const loading = loadingResponse();
+  try {
+    const productListAPI = await fetch(BASE_URL);
+    const productsListJson = await productListAPI.json();
+    loading.remove();
+    productsLocalList = productsListJson.results;
+  } catch (error) {
+    console.log(error);
+  }
 };
 
 window.onload = async () => {

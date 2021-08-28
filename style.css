@@ -1,3 +1,10 @@
+*
+{
+  margin:0;
+  padding:0;
+  box-sizing:border-box;
+}
+
 .container {
   display: flex;
   justify-content: space-around;
@@ -55,3 +62,16 @@
   font-size: 16pt;
   text-align: center;
 }
+
+.loading{
+  display:block;
+  position:absolute;
+  left:25%;
+  top:25%;
+  color:black;
+  font-size:40px;
+  font-weight:800;
+  text-align:center;
+}
+
+
