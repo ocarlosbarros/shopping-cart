@@ -44,7 +44,7 @@ const saveShopping = (productOrId) => {
   /** Source: https://pt.stackoverflow.com/questions/329223/armazenar-um-array-de-objetos-em-um-local-storage-com-js */
   let shoppigCartStorage = getCartStorage();
   if (typeof productOrId === 'string') {
-    shoppigCartStorage = shoppigCartStorage.filter((product) => product.id !== productOrId);
+    shoppigCartStorage = shoppigCartStorage.filter((product) => JSON.parse(product).id !== productOrId);
   } else {
     const productJSON = JSON.stringify(productOrId);
     shoppigCartStorage.push(productJSON);
@@ -118,6 +118,7 @@ const getItemAPI = async (event) => {
   const product = await response.json();
   saveItemInCart(product);
   saveShopping(product);
+  getTotalPrice();
 };
 
 const addCart = () => {
