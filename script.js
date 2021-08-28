@@ -1,5 +1,10 @@
 let productsLocalList = [];
 
+const getCartStorage = () => {
+  const cartStorage = JSON.parse(localStorage.getItem('shoppingCart'));
+  return cartStorage;
+};
+
 function createProductImageElement(imageSource) {
   const img = document.createElement('img');
   img.className = 'item__image';
@@ -29,27 +34,12 @@ function getSkuFromProductItem(item) {
   return item.querySelector('span.item__sku').innerText;
 }
 
-const saveShopping = (product, callback) => {
+const saveShopping = (product) => {
   /** Source: https://pt.stackoverflow.com/questions/329223/armazenar-um-array-de-objetos-em-um-local-storage-com-js */
   const productJSON = JSON.stringify(product);
-  const shoppigCartStorage = JSON.parse(localStorage.getItem('shoppingCart'));
+  const shoppigCartStorage = getCartStorage();
   shoppigCartStorage.push(productJSON);
   localStorage.setItem('shoppingCart', JSON.stringify(shoppigCartStorage));
-  callback();
-};
-
-const removeShopping = (product, callback) => {
-  /** Source: https://pt.stackoverflow.com/questions/329223/armazenar-um-array-de-objetos-em-um-local-storage-com-js */
-  const shoppigCartStorage = JSON.parse(localStorage.getItem('shoppingCart'));
-  const teste = shoppigCartStorage.filter((anyProduct) => {
-    console.log(anyProduct.id);
-    console.log(product.id);
-    return anyProduct.id !== product.id;
-  });
-
-  console.log(teste);
-  // localStorage.setItem('shoppingCart', JSON.stringify(teste));
-  callback();
 };
 
 const getTotalPrice = () => {
@@ -59,7 +49,7 @@ const getTotalPrice = () => {
     const { price } = JSON.parse(product);
     return sum + price;
   }, 0);
-  p.innerText = `Preço total: $${totalPrice}`;
+  p.innerText = `Preço total: $${totalPrice === 0 ? 0 : totalPrice}`;
 };
 
 const removeItem = () => {
@@ -85,7 +75,6 @@ function cartItemClickListener(event) {
   item.remove();
   const itemID = item.innerText.slice(5, 18);
   const productFound = findItem(itemID);
-  removeShopping(productFound, getTotalPrice);
 }
 
 function createCartItemElement({ id: sku, title: name, price: salePrice }) {
@@ -100,19 +89,16 @@ const saveItemInCart = (product) => {
   const list = document.querySelector('.cart__items');
   const li = createCartItemElement(product);
   list.appendChild(li);
-  saveShopping(product, getTotalPrice);
+  saveShopping(product);
+  getTotalPrice();
 };
 
-const loadShopping = async () => {
-  const shoppigCartStorage = JSON.parse(localStorage.getItem('shoppingCart'));
-  if (shoppigCartStorage === null) {
-    localStorage.setItem('shoppingCart', JSON.stringify([]));
-  } else {
-    shoppigCartStorage.forEach((product) => {
-      const productObject = JSON.parse(product);
-      saveItemInCart(productObject);
-    });
+const loadShopping = () => {
+  const cartStorage = getCartStorage();
+  if (cartStorage === null) {
+    localStorage.setItem('shoppingCart', '[]');
   }
+  getTotalPrice();
 };
 
 const getItemAPI = async (event) => {
@@ -154,7 +140,7 @@ const getProducts = async (product) => {
     loading.remove();
     productsLocalList = productsListJson.results;
   } catch (error) {
-    console.log(error);
+    console.log('nada');
   }
 };
 
