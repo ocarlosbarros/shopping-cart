@@ -38,6 +38,20 @@ const saveShopping = (product, callback) => {
   callback();
 };
 
+const removeShopping = (product, callback) => {
+  /** Source: https://pt.stackoverflow.com/questions/329223/armazenar-um-array-de-objetos-em-um-local-storage-com-js */
+  const shoppigCartStorage = JSON.parse(localStorage.getItem('shoppingCart'));
+  const teste = shoppigCartStorage.filter((anyProduct) => {
+    console.log(anyProduct.id);
+    console.log(product.id);
+    return anyProduct.id !== product.id;
+  });
+
+  console.log(teste);
+  // localStorage.setItem('shoppingCart', JSON.stringify(teste));
+  callback();
+};
+
 const getTotalPrice = () => {
   const p = document.querySelector('.total-price');
   const shoppigCartStorage = JSON.parse(localStorage.getItem('shoppingCart'));
@@ -48,10 +62,21 @@ const getTotalPrice = () => {
   p.innerText = `Preço total: $${totalPrice}`;
 };
 
-const addButton = () => {
+const removeItem = () => {
   const btnClearCart = document.querySelector('.empty-cart');
   btnClearCart.addEventListener('click', () => {
     document.querySelectorAll('.cart__item').forEach((li) => li.remove());
+    localStorage.clear();
+    localStorage.setItem('shoppingCart', JSON.stringify([]));
+    getTotalPrice();
+  });
+};
+
+const findItem = (id) => {
+  const shoppigCartStorage = JSON.parse(localStorage.getItem('shoppingCart'));
+  return shoppigCartStorage.find((product) => {
+    JSON.parse(product);
+    return product.id !== id;
   });
 };
 
@@ -59,7 +84,8 @@ function cartItemClickListener(event) {
   const item = event.target;
   item.remove();
   const itemID = item.innerText.slice(5, 18);
-  // const productFound = shoppigCart.find((product) => product.id !== itemID);
+  const productFound = findItem(itemID);
+  removeShopping(productFound, getTotalPrice);
 }
 
 function createCartItemElement({ id: sku, title: name, price: salePrice }) {
@@ -78,12 +104,15 @@ const saveItemInCart = (product) => {
 };
 
 const loadShopping = async () => {
-  localStorage.setItem('shoppingCart', JSON.stringify([]));
-  // if (shoppigCart.length > 0) {
-  //   shoppigCart.forEach((product) => {
-  //     saveItemInCart(product);
-  //   });
-  // }
+  const shoppigCartStorage = JSON.parse(localStorage.getItem('shoppingCart'));
+  if (shoppigCartStorage === null) {
+    localStorage.setItem('shoppingCart', JSON.stringify([]));
+  } else {
+    shoppigCartStorage.forEach((product) => {
+      const productObject = JSON.parse(product);
+      saveItemInCart(productObject);
+    });
+  }
 };
 
 const getItemAPI = async (event) => {
@@ -112,7 +141,7 @@ const fillProductsList = async () => {
 
 const loadingResponse = () => {
   const loading = document.getElementById('loading');
-  loading.innerText = 'loading.';
+  loading.innerText = 'loading...';
   return loading;
 };
 
@@ -134,5 +163,5 @@ window.onload = async () => {
   fillProductsList();
   loadShopping();
   addCart();
-  addButton();
+  removeItem();
 };
