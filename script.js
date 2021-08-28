@@ -29,19 +29,23 @@ function getSkuFromProductItem(item) {
   return item.querySelector('span.item__sku').innerText;
 }
 
-const saveShopping = (product) => {
+const saveShopping = (product, callback) => {
   /** Source: https://pt.stackoverflow.com/questions/329223/armazenar-um-array-de-objetos-em-um-local-storage-com-js */
   const productJSON = JSON.stringify(product);
   const shoppigCartStorage = JSON.parse(localStorage.getItem('shoppingCart'));
   shoppigCartStorage.push(productJSON);
   localStorage.setItem('shoppingCart', JSON.stringify(shoppigCartStorage));
+  callback();
 };
 
 const getTotalPrice = () => {
   const p = document.querySelector('.total-price');
-  /* shoppigCart.reduce((sum, product) =>
-    sum + product.price, 0); */
-  // p.innerText = `Preço total: $${shoppigCart}`;
+  const shoppigCartStorage = JSON.parse(localStorage.getItem('shoppingCart'));
+  const totalPrice = shoppigCartStorage.reduce((sum, product) => {
+    const { price } = JSON.parse(product);
+    return sum + price;
+  }, 0);
+  p.innerText = `Preço total: $${totalPrice}`;
 };
 
 const addButton = () => {
@@ -70,7 +74,7 @@ const saveItemInCart = (product) => {
   const list = document.querySelector('.cart__items');
   const li = createCartItemElement(product);
   list.appendChild(li);
-  saveShopping(product);
+  saveShopping(product, getTotalPrice);
 };
 
 const loadShopping = async () => {
