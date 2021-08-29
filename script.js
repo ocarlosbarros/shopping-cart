@@ -1,15 +1,4 @@
-let productsLocalList = [];
-
-const getCartStorage = () => {
-  let cartStorage = localStorage.getItem('shoppingCart');
-  if (cartStorage === null) {
-    cartStorage = localStorage.setItem('shoppingCart', '[]');
-    cartStorage = JSON.parse(cartStorage);
-    return cartStorage;
-  }
-  cartStorage = JSON.parse(cartStorage);
-  return cartStorage;
-};
+const shoppigCart = [];
 
 function createProductImageElement(imageSource) {
   const img = document.createElement('img');
@@ -25,14 +14,15 @@ function createCustomElement(element, className, innerText) {
   return e;
 }
 
-function createProductItemElement({ id, title, thumbnail }) {
+function createProductItemElement({ sku, name, image }) {
   const section = document.createElement('section');
+  const sectionItems = document.querySelector('.items');
   section.className = 'item';
-  section.appendChild(createCustomElement('span', 'item__sku', id));
-  section.appendChild(createCustomElement('span', 'item__title', title));
-  section.appendChild(createProductImageElement(thumbnail));
+  section.appendChild(createCustomElement('span', 'item__sku', sku));
+  section.appendChild(createCustomElement('span', 'item__title', name));
+  section.appendChild(createProductImageElement(image));
   section.appendChild(createCustomElement('button', 'item__add', 'Adicionar ao carrinho!'));
-
+  sectionItems.appendChild(section);
   return section;
 }
 
@@ -40,52 +30,36 @@ function getSkuFromProductItem(item) {
   return item.querySelector('span.item__sku').innerText;
 }
 
+/** Source: Utilizei com referência o repositório da Anna Hamann para somar os valores */
 const getTotalPrice = () => {
-  const p = document.querySelector('.total-price');
-  const shoppigCartStorage = JSON.parse(localStorage.getItem('shoppingCart'));
-  const totalPrice = shoppigCartStorage.reduce((sum, product) => {
-    const { price } = JSON.parse(product);
-    return sum + price;
-  }, 0);
-  p.innerText = `Preço total: $${totalPrice === 0 ? 0 : totalPrice.toFixed(2)}`;
+  const totalPrice = document.querySelector('.total-price');
+  const items = document.querySelectorAll('.cart__item');
+  let sum = 0;
+  items.forEach((item) => {
+    const price = (item.innerText).split('$')[1];
+    sum += parseFloat(price);
+  });
+  totalPrice.innerText = `${sum}`;
 };
 
-const saveShopping = (productOrId) => {
+const saveShopping = () => {
   /** Source: https://pt.stackoverflow.com/questions/329223/armazenar-um-array-de-objetos-em-um-local-storage-com-js */
-  let shoppigCartStorage = getCartStorage();
-  if (typeof productOrId === 'string') {
-    shoppigCartStorage = shoppigCartStorage.filter((product) =>
-      JSON.parse(product).id !== productOrId);
-  } else {
-    const productJSON = JSON.stringify(productOrId);
-    shoppigCartStorage.push(productJSON);
-  }
-  localStorage.setItem('shoppingCart', JSON.stringify(shoppigCartStorage));
+  localStorage.setItem('shoppingCart', JSON.stringify(shoppigCart));
   getTotalPrice();
 };
 
-const removeItem = () => {
+const emptyCart = () => {
   const btnClearCart = document.querySelector('.empty-cart');
   btnClearCart.addEventListener('click', () => {
     document.querySelectorAll('.cart__item').forEach((li) => li.remove());
-    localStorage.clear();
-    localStorage.setItem('shoppingCart', JSON.stringify([]));
-    getTotalPrice();
   });
-};
-
-const findItem = (id) => {
-  const shoppigCartStorage = getCartStorage();
-  return shoppigCartStorage.find((product) => JSON.parse(product).id === id);
 };
 
 function cartItemClickListener(event) {
   const item = event.target;
   item.remove();
-  const itemID = item.innerText.slice(5, 18);
-  const product = findItem(itemID);
-  const { id } = JSON.parse(product);
-  saveShopping(id);
+  saveShopping();
+  getTotalPrice();
 }
 
 function createCartItemElement({ id: sku, title: name, price: salePrice }) {
@@ -100,16 +74,18 @@ const saveItemInCart = (product) => {
   const list = document.querySelector('.cart__items');
   const li = createCartItemElement(product);
   list.appendChild(li);
-  getTotalPrice();
+  shoppigCart.push(product);
+  saveShopping();
 };
 
-const loadShopping = () => {
-  const cartStorage = getCartStorage();
-  cartStorage.forEach((product) => {
-    const productJSON = JSON.parse(product);
-    saveItemInCart(productJSON);
-  });
-  getTotalPrice();
+const loadShopping = async () => {
+  const cartItems = JSON.parse(localStorage.getItem('shoppingCart'));
+  if (cartItems !== null) {
+    cartItems.forEach((product) => {
+      saveItemInCart(product);
+      getTotalPrice();
+    });
+  }
 };
 
 const getItemAPI = async (event) => {
@@ -118,8 +94,9 @@ const getItemAPI = async (event) => {
   const itemID = getSkuFromProductItem(item);
   const response = await fetch(`https://api.mercadolibre.com/items/${itemID}`);
   const product = await response.json();
+  createCartItemElement({ sku: product.id, name: product.title, salePrice: product.price });
   saveItemInCart(product);
-  saveShopping(product);
+  saveShopping();
   getTotalPrice();
 };
 
@@ -128,19 +105,12 @@ const addCart = () => {
   btnAddItem.forEach((btnAdd) => {
     btnAdd.addEventListener('click', getItemAPI);
   });
-};
-
-const fillProductsList = async () => {
-  const sectionItems = document.querySelector('.items');
-  productsLocalList.forEach((product) => {
-    const section = createProductItemElement(product);
-    sectionItems.appendChild(section);
-  });
+  getTotalPrice();
 };
 
 const loadingResponse = () => {
   const loading = document.getElementById('loading');
-  loading.innerText = 'loading...';
+  loading.innerText = 'loading.';
   return loading;
 };
 
@@ -150,17 +120,17 @@ const getProducts = async (product) => {
   try {
     const productListAPI = await fetch(BASE_URL);
     const productsListJson = await productListAPI.json();
+    productsListJson.results.forEach(({ id: sku, title: name, thumbnail: image }) =>
+      createProductItemElement({ sku, name, image }));
+    addCart();
     loading.remove();
-    productsLocalList = productsListJson.results;
   } catch (error) {
-    console.log('nada');
+    console.log(error);
   }
 };
 
 window.onload = async () => {
   await getProducts('computador');
-  fillProductsList();
-  addCart();
-  removeItem();
   loadShopping();
+  emptyCart();
 };
