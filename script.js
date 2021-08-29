@@ -30,6 +30,7 @@ function getSkuFromProductItem(item) {
   return item.querySelector('span.item__sku').innerText;
 }
 
+/** Source: Utilizei com referência o repositório da Anna Hamann para somar os valores */
 const getTotalPrice = () => {
   const totalPrice = document.querySelector('.total-price');
   const items = document.querySelectorAll('.cart__item');
@@ -38,7 +39,7 @@ const getTotalPrice = () => {
     const price = (item.innerText).split('$')[1];
     sum += parseFloat(price);
   });
-  totalPrice.innerText = `Preço Total: R$ ${sum}`;
+  totalPrice.innerText = `${sum}`;
 };
 
 const saveShopping = () => {
@@ -57,8 +58,6 @@ const emptyCart = () => {
 function cartItemClickListener(event) {
   const item = event.target;
   item.remove();
-  // const itemID = item.innerText.slice(5, 18);
-  // shoppigCart = shoppigCart.filter((product) => product.id !== itemID);
   saveShopping();
   getTotalPrice();
 }
@@ -96,6 +95,7 @@ const getItemAPI = async (event) => {
   const response = await fetch(`https://api.mercadolibre.com/items/${itemID}`);
   const product = await response.json();
   createCartItemElement({ sku: product.id, name: product.title, salePrice: product.price });
+  saveItemInCart(product);
   saveShopping();
   getTotalPrice();
 };
@@ -107,14 +107,6 @@ const addCart = () => {
   });
   getTotalPrice();
 };
-
-// const fillProductsList = async () => {
-//   const sectionItems = document.querySelector('.items');
-//   productsLocalList.forEach((product) => {
-//     const section = createProductItemElement(product);
-//     sectionItems.appendChild(section);
-//   });
-// };
 
 const loadingResponse = () => {
   const loading = document.getElementById('loading');
@@ -139,6 +131,6 @@ const getProducts = async (product) => {
 
 window.onload = async () => {
   await getProducts('computador');
-  saveShopping();
+  loadShopping();
   emptyCart();
 };
