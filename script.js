@@ -1,5 +1,4 @@
-let shoppigCart = [];
-let productsLocalList = [];
+const shoppigCart = [];
 
 function createProductImageElement(imageSource) {
   const img = document.createElement('img');
@@ -30,12 +29,24 @@ function getSkuFromProductItem(item) {
   return item.querySelector('span.item__sku').innerText;
 }
 
+const getTotalPrice = () => {
+  const totalPrice = document.querySelector('.total-price');
+  const items = document.querySelectorAll('.cart__item');
+  let sum = 0;
+  items.forEach((item) => {
+    const price = (item.innerText).split('$')[1];
+    sum += parseFloat(price);
+  });
+  totalPrice.innerText = `Preço Total: R$ ${sum}`;
+};
+
 const saveShopping = () => {
   /** Source: https://pt.stackoverflow.com/questions/329223/armazenar-um-array-de-objetos-em-um-local-storage-com-js */
   localStorage.setItem('shoppingCart', JSON.stringify(shoppigCart));
+  getTotalPrice();
 };
 
-const removeItem = () => {
+const emptyCart = () => {
   const btnClearCart = document.querySelector('.empty-cart');
   btnClearCart.addEventListener('click', () => {
     document.querySelectorAll('.cart__item').forEach((li) => li.remove());
@@ -45,9 +56,10 @@ const removeItem = () => {
 function cartItemClickListener(event) {
   const item = event.target;
   item.remove();
-  const itemID = item.innerText.slice(5, 18);
-  shoppigCart = shoppigCart.filter((product) => product.id !== itemID);
+  // const itemID = item.innerText.slice(5, 18);
+  // shoppigCart = shoppigCart.filter((product) => product.id !== itemID);
   saveShopping();
+  getTotalPrice();
 }
 
 function createCartItemElement({ id: sku, title: name, price: salePrice }) {
@@ -67,15 +79,13 @@ const saveItemInCart = (product) => {
 };
 
 const loadShopping = async () => {
-  JSON.parse(localStorage.getItem('shoppingCart')).forEach((product) => {
-    saveItemInCart(product);
-  });
-};
-
-const getTotalPrice = () => {
-  const totalPrice = document.querySelector('.total-price');
-  const total = shoppigCart.reduce((sum, product) => sum + product.price, 0);
-  totalPrice.innerText += ` ${total}`;
+  const cartItems = JSON.parse(localStorage.getItem('shoppingCart'));
+  if (cartItems !== null) {
+    cartItems.forEach((product) => {
+      saveItemInCart(product);
+      getTotalPrice();
+    });
+  }
 };
 
 const getItemAPI = async (event) => {
@@ -84,7 +94,9 @@ const getItemAPI = async (event) => {
   const itemID = getSkuFromProductItem(item);
   const response = await fetch(`https://api.mercadolibre.com/items/${itemID}`);
   const product = await response.json();
-  saveItemInCart(product);
+  createCartItemElement({ sku: product.id, name: product.title, salePrice: product.price });
+  saveShopping();
+  getTotalPrice();
 };
 
 const addCart = () => {
@@ -92,15 +104,16 @@ const addCart = () => {
   btnAddItem.forEach((btnAdd) => {
     btnAdd.addEventListener('click', getItemAPI);
   });
+  getTotalPrice();
 };
 
-const fillProductsList = async () => {
-  const sectionItems = document.querySelector('.items');
-  productsLocalList.forEach((product) => {
-    const section = createProductItemElement(product);
-    sectionItems.appendChild(section);
-  });
-};
+// const fillProductsList = async () => {
+//   const sectionItems = document.querySelector('.items');
+//   productsLocalList.forEach((product) => {
+//     const section = createProductItemElement(product);
+//     sectionItems.appendChild(section);
+//   });
+// };
 
 const loadingResponse = () => {
   const loading = document.getElementById('loading');
@@ -114,8 +127,10 @@ const getProducts = async (product) => {
   try {
     const productListAPI = await fetch(BASE_URL);
     const productsListJson = await productListAPI.json();
+    productsListJson.results.forEach(({ id: sku, title: name, thumbnail: image }) =>
+      createProductItemElement({ sku, name, image }));
+    addCart();
     loading.remove();
-    productsLocalList = productsListJson.results;
   } catch (error) {
     console.log(error);
   }
@@ -124,8 +139,6 @@ const getProducts = async (product) => {
 window.onload = async () => {
   await getProducts('computador');
   fillProductsList();
-  addCart();
-  loadShopping();
-  removeItem();
-  getTotalPrice();
+  saveShopping();
+  emptyCart();
 };
