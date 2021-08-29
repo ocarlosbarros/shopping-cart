@@ -77,7 +77,8 @@ const getTotalPrice = () => {
   const currentTotal = JSON.parse(localStorage.getItem('shoppingCart'));
   const cart = document.querySelector('.cart');
   const p = document.createElement('p');
-  const totalPrice = currentTotal === null ? 0 : currentTotal.reduce((sum, product) => sum + product.base_price, 0);
+  const totalPrice = currentTotal === null ? 0
+    : currentTotal.reduce((sum, product) => sum + product.base_price, 0);
   p.innerText = `Preço total: ${totalPrice.toFixed(2)}`;
   p.classList.add('total-price');
   cart.appendChild(p);
